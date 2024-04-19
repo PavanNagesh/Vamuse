@@ -58,37 +58,20 @@ def user_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        query = f"SELECT * FROM amuse_user WHERE username = '{username}'"
+        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
 
         with connection.cursor() as cursor:
             cursor.execute(query)
             row = cursor.fetchone()
 
         if row:
-            # Check if the password is encrypted
-            if row and len(row) > 1 and row[1].startswith('pbkdf2_'):
-                # Password is encrypted, use Django's check_password function
-                if check_password(password, row[1]):
-                    # Get the user object
-                    user = User.objects.get(username=username)
-                    
-                    # Manually update the last_login field
-                    user.last_login = timezone.now()
-                    user.save()
+            user = User.objects.get(username=username)
+            user.last_login = timezone.now()
+            user.save()
 
-                    # Log the user in using Django's login function
-                    auth_login(request, user)
-                    return redirect('index')
-            else:
-                # Password is not encrypted, bypass password check
-                # Manually update the last_login field
-                user = User.objects.get(username=username)
-                user.last_login = timezone.now()
-                user.save()
-
-                # Log the user in using Django's login function
-                auth_login(request, user)
-                return redirect('index')
+            # Log the user in using Django's login function
+            auth_login(request, user)
+            return redirect('index')
 
         return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
