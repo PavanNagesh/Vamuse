@@ -14,7 +14,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
+
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
