@@ -20,6 +20,7 @@ from django.core.validators import validate_email
 
 
 
+
 def signin(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -133,8 +134,26 @@ def safety(request):
 def rules(request):
     return render(request, 'rules.html')
 
-@csrf_exempt
+@login_required
 def update(request):
+    # Handle form submission via POST request
+    if request.method == 'POST':
+        new_username = request.POST.get('username')
+        new_email = request.POST.get('email')
+        # Retrieve the current user
+        user = request.user
+        # Update the user's username
+        if new_username:
+            user.username = new_username
+        # Update the user's email
+        if new_email:
+            user.email = new_email
+        # Save the updated user data
+        user.save()
+        # Provide feedback to the user
+        messages.success(request, "Profile updated successfully!")
+        # Redirect the user to their profile page
+        return redirect('userprofile')
+    # Render the update profile form for GET requests
     return render(request, 'update.html')
-
 
