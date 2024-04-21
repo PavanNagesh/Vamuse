@@ -117,7 +117,7 @@ def home(request):
 
 
 @login_required
-
+@csrf_exempt 
 def change(request):
     if request.method == 'POST':
         new_email = request.POST.get('new_email')
