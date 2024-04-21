@@ -133,6 +133,7 @@ def safety(request):
 def rules(request):
     return render(request, 'rules.html')
 
+@csrf_exempt
 def update(request):
     return render(request, 'update.html')
 
