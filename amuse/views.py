@@ -19,7 +19,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.contrib.auth import authenticate, login
 import time
-
+from django.conf import settings
+from datetime import datetime, timedelta
 
 
 
