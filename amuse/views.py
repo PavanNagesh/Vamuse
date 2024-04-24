@@ -60,18 +60,22 @@ def user_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Authenticate user using Django's authenticate function
-        user = authenticate(request, username=username, password=password)
+        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
 
-        if user is not None:
-            # Log the user in
-            login(request, user)
-            # Redirect to the desired page after successful login
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            row = cursor.fetchone()
+
+        if row:
+            user = User.objects.get(username=username)
+            user.last_login = timezone.now()
+            user.save()
+
+            # Log the user in using Django's login function
+            auth_login(request, user)
             return redirect('index')
-        else:
-            # Display an error message if authentication fails
-            messages.error(request, 'Invalid username or password.')
-            return render(request, 'login.html')
+
+        return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
 
