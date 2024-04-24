@@ -80,7 +80,7 @@ def user_login(request):
             send_mail(
                 'Your OTP for Login Verification',
                 f'Your OTP is: {otp}',
-                'sender@example.com',  # Replace with your sender email
+                'pavannagesh681@gmail.com',  # Replace with your sender email
                 [user.email],  # Send OTP to user's email
                 fail_silently=False,
             )
