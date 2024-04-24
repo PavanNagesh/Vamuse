@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-6!#9tm*zian%p^f53dq^l&5cwz5y0@%!ko!r-alv@!hdvh&6q$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-SESSION_COOKIE_SAMESITE = 'None'
+
 
 
 ALLOWED_HOSTS = [
@@ -143,4 +143,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
