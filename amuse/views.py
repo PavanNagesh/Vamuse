@@ -62,7 +62,6 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 import time
 
-# Dictionary to track failed login attempts and their timestamps
 failed_login_attempts = {}
 
 def user_login(request):
@@ -93,7 +92,6 @@ def user_login(request):
             return render(request, 'login.html')
     else:
         return render(request, 'login.html')
-
 
     
 def user_profile(request):
