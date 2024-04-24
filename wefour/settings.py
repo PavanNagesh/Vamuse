@@ -57,7 +57,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "amuse.middleware.SessionSecurityMiddleware",
+    "wefour.middleware.SessionSecurityMiddleware",
 ]
 
 ROOT_URLCONF = "wefour.urls"
