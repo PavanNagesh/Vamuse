@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-from two_factor.auth_backends import OTPAuthenticationBackend
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,13 +45,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "amuse",
-]
-
-# Define the authentication backends
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # Default authentication backend
-    'two_factor.auth_backends.OTPAuthenticationBackend',  # Multi-factor authentication backend
 ]
 
 MIDDLEWARE = [
@@ -63,6 +55,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "amuse.middleware.BruteForceMiddleware",
 ]
 
 ROOT_URLCONF = "wefour.urls"
@@ -148,9 +141,12 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-MAX_FAILED_LOGIN_ATTEMPTS = 3
+# Maximum login attempts before lockout
+MAX_LOGIN_ATTEMPTS = 5
 
-LOGIN_ATTEMPTS_TIMEOUT_SECONDS = 60
+# Lockout time in seconds
+LOCKOUT_TIME = 300  # 5 minutes
+
 
 SESSION_COOKIE_AGE = 1209600  # 2 weeks, set the session age in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # End session when browser closes
