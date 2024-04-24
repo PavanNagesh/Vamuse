@@ -50,6 +50,11 @@ INSTALLED_APPS = [
     "two_factor",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default authentication backend
+    'two_factor.auth_backends.OTPAuthenticationBackend',  # Multi-factor authentication backend
+]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
