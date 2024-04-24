@@ -44,7 +44,7 @@ def signin(request):
         
         try:
             # Create a new user instance and save it to the database
-            user = User.objects.create_user(username=username, email=email, password=password)
+            user = User.objects.create(username=username, email=email, password=password)
             messages.success(request, 'You are now registered and can log in.')
             return redirect('login')  # Redirect to the login page after successful sign-up
         except IntegrityError:
