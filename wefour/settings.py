@@ -145,7 +145,10 @@ MAX_FAILED_LOGIN_ATTEMPTS = 3
 
 LOGIN_ATTEMPTS_TIMEOUT_SECONDS = 60
 
-
+SESSION_COOKIE_AGE = 1209600  # 2 weeks, set the session age in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # End session when browser closes
+SESSION_COOKIE_SECURE = False  # Set True if you are using HTTPS
+SESSION_SAVE_EVERY_REQUEST = False  # Save session on every request (optional)
 
 
 
