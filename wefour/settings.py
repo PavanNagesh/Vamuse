@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from django.contrib.auth.backends import ModelBackend
+from two_factor.auth_backends import OTPAuthenticationBackend
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,6 +48,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "amuse",
+]
+
+# Define the authentication backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default authentication backend
+    'two_factor.auth_backends.OTPAuthenticationBackend',  # Multi-factor authentication backend
 ]
 
 MIDDLEWARE = [
