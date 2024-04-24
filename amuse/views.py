@@ -21,6 +21,8 @@ from django.contrib.auth import authenticate, login
 import time
 from django.conf import settings
 from datetime import datetime, timedelta
+from django.core.mail import send_mail
+import random
 
 
 
@@ -62,24 +64,50 @@ def user_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
+        # Authenticate user using username and password
+        user = authenticate(request, username=username, password=password)
 
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-            row = cursor.fetchone()
-
-        if row:
-            user = User.objects.get(username=username)
+        if user is not None:
+            auth_login(request, user)
             user.last_login = timezone.now()
             user.save()
 
-            # Log the user in using Django's login function
-            auth_login(request, user)
-            return redirect('index')
+            # Generate OTP
+            otp = ''.join(random.choices('0123456789', k=6))  # Generate a 6-digit OTP
+            request.session['otp'] = otp  # Store OTP in session
 
-        return render(request, 'login.html', {'error': 'Invalid username or password.'})
+            # Send OTP to user's email
+            send_mail(
+                'Your OTP for Login Verification',
+                f'Your OTP is: {otp}',
+                'sender@example.com',  # Replace with your sender email
+                [user.email],  # Send OTP to user's email
+                fail_silently=False,
+            )
+
+            # Redirect user to OTP verification page
+            return redirect('otp_verification')
+        else:
+            return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
+# Define the OTP verification view
+def otp_verification(request):
+    if request.method == 'POST':
+        entered_otp = request.POST.get('otp')
+
+        # Retrieve OTP from session
+        otp = request.session.get('otp')
+
+        # Validate entered OTP
+        if entered_otp == otp:
+            # OTP is valid, redirect user to home page or desired destination
+            return redirect('index')
+        else:
+            return render(request, 'otp_verification.html', {'error': 'Invalid OTP. Please try again.'})
+    else:
+        return render(request, 'otp_verification.html')
     
 def user_profile(request):
     # Assuming user is already authenticated
