@@ -18,7 +18,7 @@ class BruteForceMiddleware:
             if login_attempts >= settings.MAX_LOGIN_ATTEMPTS:
                 logout(request)
                 messages.error(request, "Your account is temporarily locked. Please try again later.")
-            elif response.context_data.get('invalid_login', False):
+            elif 'invalid_login' in request.POST:
                 request.session['login_attempts'] = login_attempts + 1
             else:
                 request.session['login_attempts'] = 0
