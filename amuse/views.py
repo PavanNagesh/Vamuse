@@ -69,6 +69,12 @@ def user_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
+        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
+
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            row = cursor.fetchone()
+
         # Check if the user has exceeded the maximum number of failed attempts within a time period
         if username in failed_login_attempts:
             attempts, last_attempt_time = failed_login_attempts[username]
