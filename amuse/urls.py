@@ -21,7 +21,6 @@ from django.conf.urls.static import static
 from django.urls import path
 from . import views
 from .views import user_profile, logout_view
-from .views import user_login, otp_verification
 
 
 urlpatterns = [
@@ -44,7 +43,6 @@ urlpatterns = [
     path('update/', views.update, name='update'),
     path('change', views.change, name='changE'),
     path('userprofile/update/', views.update, name='update'),
-    path('otp-verification/', otp_verification, name='otp_verification'),
     
 ]
 
