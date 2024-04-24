@@ -80,7 +80,7 @@ def user_login(request):
             send_mail(
                 'Your OTP for Login Verification',
                 f'Your OTP is: {otp}',
-                'pavannagesh681@gmail.com',  # Replace with your sender email
+                'sender@example.com',  # Replace with your sender email
                 [user.email],  # Send OTP to user's email
                 fail_silently=False,
             )
@@ -102,10 +102,11 @@ def otp_verification(request):
 
         # Validate entered OTP
         if entered_otp == otp:
-            # OTP is valid, redirect user to home page or desired destination
+            # OTP is valid, redirect user to home page
             return redirect('index')
         else:
-            return render(request, 'otp_verification.html', {'error': 'Invalid OTP. Please try again.'})
+            # Invalid OTP, redirect user to login page
+            return redirect('user_login')
     else:
         return render(request, 'otp_verification.html')
     
