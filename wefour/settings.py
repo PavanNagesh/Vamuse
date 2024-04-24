@@ -141,6 +141,10 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+MAX_FAILED_LOGIN_ATTEMPTS = 3
+
+LOGIN_ATTEMPTS_TIMEOUT_SECONDS = 60
+
 
 
 
