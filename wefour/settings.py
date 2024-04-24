@@ -47,8 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "amuse",
 ]
-ALLOWED_IP_ADDRESSES = ['192.168.1.1']
-ALLOWED_USER_AGENTS = ['Chrome/']
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
