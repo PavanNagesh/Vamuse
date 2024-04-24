@@ -57,13 +57,6 @@ def signin(request):
 
 
 
-from django.contrib.auth import authenticate, login
-from django.shortcuts import render, redirect
-from django.contrib import messages
-import time
-
-failed_login_attempts = {}
-
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -75,30 +68,18 @@ def user_login(request):
             cursor.execute(query)
             row = cursor.fetchone()
 
-        # Check if the user has exceeded the maximum number of failed attempts within a time period
-        if username in failed_login_attempts:
-            attempts, last_attempt_time = failed_login_attempts[username]
-            if time.time() - last_attempt_time < 60:  # Time period in seconds (e.g., 60 seconds)
-                # Too many failed attempts within the time period, show error and prevent login
-                messages.error(request, 'Too many failed login attempts. Please try again later.')
-                return render(request, 'login.html')
+        if row:
+            user = User.objects.get(username=username)
+            user.last_login = timezone.now()
+            user.save()
 
-        # Authenticate user
-        user = authenticate(username=username, password=password)
-
-        if user is not None:
-            # Login successful, reset failed login attempts and redirect to home page
-            del failed_login_attempts[username]  # Reset failed attempts if login is successful
-            login(request, user)
+            # Log the user in using Django's login function
+            auth_login(request, user)
             return redirect('index')
-        else:
-            # Login failed, track the attempt and display error message
-            failed_login_attempts[username] = (failed_login_attempts.get(username, (0, 0))[0] + 1, time.time())
-            messages.error(request, 'Invalid username or password.')
-            return render(request, 'login.html')
+
+        return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
-
     
 def user_profile(request):
     # Assuming user is already authenticated
