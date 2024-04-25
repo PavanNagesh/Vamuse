@@ -110,7 +110,6 @@ def user_login(request):
 
 
 
-
 def user_profile(request):
     # Assuming user is already authenticated
     # You can access user's details via request.user
