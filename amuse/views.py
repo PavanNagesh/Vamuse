@@ -61,6 +61,7 @@ def signin(request):
 
 
 from django.contrib.auth import authenticate, login
+from django.db import connection
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -89,16 +90,24 @@ def user_login(request):
                 request.session['login_attempts'] += 1
             else:
                 request.session['login_attempts'] = 1
-           
+            
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
-                # Set next attempt time 5 minutes from now
-                request.session['next_attempt_time'] = timezone.now() + timedelta(minutes=5)
-                return render(request, 'forbidden.html', {'next_attempt_time': request.session['next_attempt_time']})
-
+                request.session['login_blocked_until'] = timezone.now() + timedelta(seconds=300)
+                return HttpResponseForbidden("Too many login attempts. Please try again later.")
+                
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
+        if 'login_blocked_until' in request.session:
+            blocked_until = request.session['login_blocked_until']
+            if timezone.now() < blocked_until:
+                time_left = int((blocked_until - timezone.now()).total_seconds())
+                return render(request, 'forbidden.html', {'time_left': time_left})
+            else:
+                del request.session['login_blocked_until']
+        
         return render(request, 'login.html')
+
 
 
 
