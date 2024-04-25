@@ -64,17 +64,22 @@ from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect
+from django.utils import timezone
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
             user.last_login = timezone.now()
             user.save()
-            return redirect('index')  # Redirect to the index page upon successful login
+            return redirect('index')
         else:
             # Log failed login attempts
             if 'login_attempts' in request.session:
@@ -84,23 +89,11 @@ def user_login(request):
             
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
-                last_attempt_time_str = request.session.get('last_attempt_time')
-                if last_attempt_time_str:
-                    last_attempt_time = timezone.datetime.fromisoformat(last_attempt_time_str)
-                    if timezone.now() < last_attempt_time + timezone.timedelta(seconds=300):
-                        remaining_time = (last_attempt_time + timezone.timedelta(seconds=300) - timezone.now()).seconds
-                        return render(request, 'login.html', {'error': f"Too many login attempts. Please try again in {remaining_time} seconds."})
-                else:
-                    last_attempt_time = timezone.now()
+                return HttpResponseForbidden("Too many login attempts. Please try again later.")
 
-                # Reset login attempts counter and update last attempt time
-                request.session['login_attempts'] = 1
-                request.session['last_attempt_time'] = last_attempt_time.isoformat()
-                    
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
-
 
     
 def user_profile(request):
