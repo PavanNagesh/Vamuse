@@ -87,19 +87,24 @@ def user_login(request):
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
                 # Check if enough time has passed since the last login attempt
-                last_attempt_time = request.session.get('last_attempt_time')
-                if last_attempt_time and timezone.now() < last_attempt_time + timezone.timedelta(seconds=300):
-                    # Calculate remaining time
-                    remaining_time = (last_attempt_time + timezone.timedelta(seconds=300) - timezone.now()).seconds
-                    return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
+                last_attempt_time_str = request.session.get('last_attempt_time')
+                if last_attempt_time_str:
+                    last_attempt_time = timezone.datetime.fromisoformat(last_attempt_time_str)
+                    if timezone.now() < last_attempt_time + timezone.timedelta(seconds=300):
+                        # Calculate remaining time
+                        remaining_time = (last_attempt_time + timezone.timedelta(seconds=300) - timezone.now()).seconds
+                        return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
                 else:
-                    # Reset login attempts counter and last attempt time
-                    request.session['login_attempts'] = 1
-                    request.session['last_attempt_time'] = timezone.now()
+                    last_attempt_time = timezone.now()
+
+                # Reset login attempts counter and update last attempt time
+                request.session['login_attempts'] = 1
+                request.session['last_attempt_time'] = last_attempt_time.isoformat()
                     
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
     
 def user_profile(request):
     # Assuming user is already authenticated
