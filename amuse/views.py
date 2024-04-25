@@ -60,6 +60,12 @@ def signin(request):
 
 
 
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect
+from django.utils import timezone
+import time
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -80,11 +86,21 @@ def user_login(request):
             
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
-                return HttpResponseForbidden("Too many login attempts. Please try again later.")
-
+                # Check if enough time has passed since the last login attempt
+                last_attempt_time = request.session.get('last_attempt_time', 0)
+                if timezone.now() < last_attempt_time + timezone.timedelta(seconds=300):
+                    # Calculate remaining time
+                    remaining_time = (last_attempt_time + timezone.timedelta(seconds=300) - timezone.now()).seconds
+                    return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
+                else:
+                    # Reset login attempts counter and last attempt time
+                    request.session['login_attempts'] = 1
+                    request.session['last_attempt_time'] = timezone.now()
+                    
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
     
 def user_profile(request):
     # Assuming user is already authenticated
