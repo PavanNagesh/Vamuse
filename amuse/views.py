@@ -95,7 +95,7 @@ def user_login(request):
             if request.session.get('login_attempts', 0) >= 5:
                 return HttpResponseForbidden("Too many login attempts. Please try again later." )
 
-            return render(request, 'login.html', {'error': 'Invalid username or password. {{ time_remaining }}'})
+            return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
 
