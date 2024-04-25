@@ -72,6 +72,12 @@ def user_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
+        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
+
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            row = cursor.fetchone()
+
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
