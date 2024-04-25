@@ -61,54 +61,28 @@ def signin(request):
 
 
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
-from django.utils import timezone
-import time
+from django.contrib import messages
 
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        user = authenticate(username=username, password=password)
+        # Authenticate user using Django's authenticate function
+        user = authenticate(request, username=username, password=password)
+
         if user is not None:
+            # Log the user in
             login(request, user)
-            user.last_login = timezone.now()
-            user.save()
+            # Redirect to the desired page after successful login
             return redirect('index')
         else:
-            # Log failed login attempts
-            if 'login_attempts' in request.session:
-                request.session['login_attempts'] += 1
-            else:
-                request.session['login_attempts'] = 1
-            
-            # Check if login attempts exceed limit
-            if request.session.get('login_attempts', 0) >= 5:
-                # Check if enough time has passed since the last login attempt
-                last_attempt_time_str = request.session.get('last_attempt_time')
-                if last_attempt_time_str:
-                    last_attempt_time = timezone.datetime.fromisoformat(last_attempt_time_str)
-                    if timezone.now() < last_attempt_time + timezone.timedelta(seconds=300):
-                        # Calculate remaining time
-                        remaining_time = (last_attempt_time + timezone.timedelta(seconds=300) - timezone.now()).seconds
-                        return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
-                else:
-                    last_attempt_time = timezone.now()
-
-                # Reset login attempts counter and update last attempt time
-                request.session['login_attempts'] = 1
-                request.session['last_attempt_time'] = last_attempt_time.isoformat()
-                    
-            return render(request, 'login.html', {'error': 'Invalid username or password.'})
+            # Display an error message if authentication fails
+            messages.error(request, 'Invalid username or password.')
+            return render(request, 'login.html')
     else:
         return render(request, 'login.html')
-
-
-
-
-
 
 def user_profile(request):
     # Assuming user is already authenticated
