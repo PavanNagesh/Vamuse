@@ -92,10 +92,9 @@ def user_login(request):
            
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
-                # Calculate the time when the user can try again
-                next_attempt_time = request.session['next_attempt_time']
-                time_left = (next_attempt_time - timezone.now()).total_seconds()
-                return render(request, 'forbidden.html', {'time_left': int(time_left)})
+                # Set next attempt time 5 minutes from now
+                request.session['next_attempt_time'] = timezone.now() + timedelta(minutes=5)
+                return render(request, 'forbidden.html', {'time_left': 300})
 
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
