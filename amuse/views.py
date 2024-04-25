@@ -64,7 +64,7 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 def user_login(request):
     if request.method == 'POST':
@@ -94,11 +94,12 @@ def user_login(request):
             if request.session.get('login_attempts', 0) >= 5:
                 # Set next attempt time 5 minutes from now
                 request.session['next_attempt_time'] = timezone.now() + timedelta(minutes=5)
-                return render(request, 'forbidden.html', {'time_left': 300})
+                return render(request, 'forbidden.html', {'next_attempt_time': request.session['next_attempt_time']})
 
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
 
 
 
