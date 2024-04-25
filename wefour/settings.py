@@ -97,7 +97,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MAX_LOGIN_ATTEMPTS = 5
 
-LOCKOUT_TIME = 20  # 5 minutes
+LOCKOUT_TIME = 300  # 5 minutes
 
 SESSION_COOKIE_AGE = 1209600  # 2 weeks, set the session age in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # End session when browser closes
