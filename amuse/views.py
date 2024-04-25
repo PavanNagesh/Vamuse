@@ -65,6 +65,11 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect
+from django.utils import timezone
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -81,10 +86,6 @@ def user_login(request):
             login(request, user)
             user.last_login = timezone.now()
             user.save()
-            
-            # Reset login attempts
-            request.session.pop('login_attempts', None)
-            
             return redirect('index')
         else:
             # Log failed login attempts
@@ -115,7 +116,7 @@ def user_login(request):
                 
                         function updateCountdown() {
                             if (countdown <= 0) {
-                                window.location.href = "/login/"; // Redirect to login page after countdown finishes
+                                window.location.reload(); // Refresh the page after countdown finishes
                             } else {
                                 countdownElement.innerHTML = "Try again after " + countdown + " seconds.";
                                 countdown--;
@@ -133,9 +134,6 @@ def user_login(request):
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
-
-
-
 
 
 def user_profile(request):
