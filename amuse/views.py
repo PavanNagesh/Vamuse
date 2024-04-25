@@ -66,6 +66,20 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 import time
 
+import time
+from datetime import datetime, timedelta
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponseForbidden
+
+import time
+from datetime import datetime, timedelta
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponseForbidden
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -76,8 +90,8 @@ def user_login(request):
             last_attempt_time = request.session['last_login_attempt']
             if time.time() - last_attempt_time < 300:  # Time period in seconds (e.g., 300 seconds)
                 # Too many failed attempts within the time period, show error and prevent login
-                messages.error(request, 'Too many failed login attempts. Please try again later.')
-                return render(request, 'login.html')
+                time_remaining = int(300 - (time.time() - last_attempt_time))
+                return render(request, 'login.html', {'error': 'Too many failed login attempts. Please try again later.', 'time_remaining': time_remaining})
 
         user = authenticate(username=username, password=password)
         if user is not None:
@@ -95,13 +109,24 @@ def user_login(request):
             if request.session.get('login_attempts', 0) >= 5:
                 # Set last login attempt time
                 request.session['last_login_attempt'] = time.time()
-                return HttpResponseForbidden("Too many login attempts. Please try again later.")
+                time_remaining = 300
+                return render(request, 'login.html', {'error': 'Too many login attempts. Please try again later.', 'time_remaining': time_remaining})
 
             # Set last login attempt time
             request.session['last_login_attempt'] = time.time()
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
+        # Check if the user has exceeded the maximum number of failed attempts within a time period
+        if 'last_login_attempt' in request.session:
+            last_attempt_time = request.session['last_login_attempt']
+            if time.time() - last_attempt_time < 300:  # Time period in seconds (e.g., 300 seconds)
+                # Too many failed attempts within the time period, show error and prevent login
+                time_remaining = int(300 - (time.time() - last_attempt_time))
+                return render(request, 'login.html', {'error': 'Too many failed login attempts. Please try again later.', 'time_remaining': time_remaining})
+
         return render(request, 'login.html')
+
+
 
 
 def user_profile(request):
