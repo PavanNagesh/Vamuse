@@ -64,7 +64,6 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import timezone
-import time
 
 def user_login(request):
     if request.method == 'POST':
