@@ -66,35 +66,39 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 import time
 
-
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
-
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-            row = cursor.fetchone()
+        # Check if the user has exceeded the maximum number of failed attempts within a time period
+        if 'last_login_attempt' in request.session:
+            last_attempt_time = request.session['last_login_attempt']
+            if time.time() - last_attempt_time < 300:  # Time period in seconds (e.g., 300 seconds)
+                # Too many failed attempts within the time period, show error and prevent login
+                messages.error(request, 'Too many failed login attempts. Please try again later.')
+                return render(request, 'login.html')
 
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            user.last_login = timezone.now()
-            user.save()
+            # Reset login attempts on successful login
+            if 'login_attempts' in request.session:
+                del request.session['login_attempts']
             return redirect('index')
         else:
             # Log failed login attempts
-            if 'login_attempts' in request.session:
-                request.session['login_attempts'] += 1
-            else:
-                request.session['login_attempts'] = 1
+            request.session.setdefault('login_attempts', 0)
+            request.session['login_attempts'] += 1
             
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
+                # Set last login attempt time
+                request.session['last_login_attempt'] = time.time()
                 return HttpResponseForbidden("Too many login attempts. Please try again later.")
 
+            # Set last login attempt time
+            request.session['last_login_attempt'] = time.time()
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
