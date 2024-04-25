@@ -3,7 +3,6 @@
 import os
 import sys
 
-
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wefour.settings")
@@ -15,8 +14,13 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    execute_from_command_line(sys.argv)
+    
+    # Add user site-packages directory to Python path
+    user_site_packages = os.path.expanduser('~/.local/lib/python3.10/site-packages')
+    if user_site_packages not in sys.path:
+        sys.path.append(user_site_packages)
 
+    execute_from_command_line(sys.argv)
 
 if __name__ == "__main__":
     main()
