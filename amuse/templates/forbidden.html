@@ -1,1 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forbidden</title>
+</head>
+<body>
+    <h1>Too many login attempts. Please try again later.</h1>
+    <h2>Time left: <span id="timer">{{ time_left }}</span> seconds</h2>
+
+    <script>
+        // Countdown timer
+        var seconds = {{ time_left }};
+        
+        function countdown() {
+            seconds--;
+            document.getElementById("timer").innerText = seconds;
+            if (seconds <= 0) {
+                clearInterval(timerInterval);
+                window.location.href = '/login/'; // Redirect to login page after timer ends
+            }
+        }
+
+        var timerInterval = setInterval(countdown, 1000);
+    </script>
+</body>
+</html>
 
