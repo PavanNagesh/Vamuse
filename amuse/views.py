@@ -81,6 +81,10 @@ def user_login(request):
             login(request, user)
             user.last_login = timezone.now()
             user.save()
+            
+            # Reset login attempts
+            request.session.pop('login_attempts', None)
+            
             return redirect('index')
         else:
             # Log failed login attempts
@@ -111,7 +115,7 @@ def user_login(request):
                 
                         function updateCountdown() {
                             if (countdown <= 0) {
-                                window.location.reload(); // Refresh the page after countdown finishes
+                                window.location.href = "/login/"; // Redirect to login page after countdown finishes
                             } else {
                                 countdownElement.innerHTML = "Try again after " + countdown + " seconds.";
                                 countdown--;
@@ -129,6 +133,7 @@ def user_login(request):
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
 
 
 
