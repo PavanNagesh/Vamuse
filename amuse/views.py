@@ -66,10 +66,6 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 import time
 
-from django.contrib.auth import authenticate, login
-from django.http import HttpResponseForbidden
-from django.shortcuts import render, redirect
-from django.utils import timezone
 
 def user_login(request):
     if request.method == 'POST':
@@ -96,6 +92,8 @@ def user_login(request):
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
+
 def user_profile(request):
     # Assuming user is already authenticated
     # You can access user's details via request.user
