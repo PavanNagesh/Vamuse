@@ -65,11 +65,6 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
-from django.contrib.auth import authenticate, login
-from django.http import HttpResponseForbidden
-from django.shortcuts import render, redirect
-from django.utils import timezone
-
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -93,7 +88,7 @@ def user_login(request):
                 request.session['login_attempts'] += 1
             else:
                 request.session['login_attempts'] = 1
-               
+
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
                 response = HttpResponseForbidden()
@@ -130,7 +125,7 @@ def user_login(request):
                 </html>
                 """
                 return response
-                
+
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
