@@ -17,7 +17,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'amuse',
-    'ratelimit',
 ]
 
 MIDDLEWARE = [
@@ -29,7 +28,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "amuse.middleware.BruteForceMiddleware",  # Ensure this is in the correct position
-    "ratelimit.middleware.RatelimitMiddleware"
 ]
 
 ROOT_URLCONF = "wefour.urls"
