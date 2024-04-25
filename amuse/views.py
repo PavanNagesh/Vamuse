@@ -77,7 +77,8 @@ def user_login(request):
             user.save()
             return redirect('index')
         else:
-            # Log failed login attempts
+            # Log failed login attempts (optional)
+            # Consider using a dedicated logging framework or database
 
             if 'login_attempts' in request.session:
                 request.session['login_attempts'] += 1
@@ -104,7 +105,8 @@ def user_login(request):
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
 
     else:
-        return render(request, 'login.html')
+        return render(request, 'index.html')
+
 
 
 
