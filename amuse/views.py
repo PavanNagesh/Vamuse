@@ -105,7 +105,7 @@ def user_login(request):
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
 
     else:
-        return render(request, 'index.html')
+        return render(request, 'login.html')
 
 
 
