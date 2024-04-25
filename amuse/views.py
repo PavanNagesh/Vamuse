@@ -64,8 +64,6 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.utils import timezone
-import time
-from datetime import datetime, timedelta
 
 def user_login(request):
     if request.method == 'POST':
@@ -93,7 +91,40 @@ def user_login(request):
                
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
-                return render(request, 'forbidden.html')
+                response = HttpResponseForbidden()
+                response.content = """
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Forbidden</title>
+                </head>
+                <body>
+                    <h1>Too many login attempts. Please try again later.</h1>
+                    <p id="countdown"></p>
+                
+                    <script>
+                        var countdownElement = document.getElementById("countdown");
+                        var countdown = 300; // 300 seconds
+                
+                        function updateCountdown() {
+                            if (countdown <= 0) {
+                                window.location.reload(); // Refresh the page after countdown finishes
+                            } else {
+                                countdownElement.innerHTML = "Try again after " + countdown + " seconds.";
+                                countdown--;
+                                setTimeout(updateCountdown, 1000); // Update every second
+                            }
+                        }
+                
+                        updateCountdown();
+                    </script>
+                </body>
+                </html>
+                """
+                return response
                 
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
