@@ -23,6 +23,7 @@ from django.conf import settings
 from datetime import datetime, timedelta
 from django.core.mail import send_mail
 import random
+from django.http import HttpResponseForbidden
 
 
 
@@ -64,22 +65,24 @@ def user_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
-
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-            row = cursor.fetchone()
-
-        if row:
-            user = User.objects.get(username=username)
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)
             user.last_login = timezone.now()
             user.save()
-
-            # Log the user in using Django's login function
-            auth_login(request, user)
             return redirect('index')
+        else:
+            # Log failed login attempts
+            if 'login_attempts' in request.session:
+                request.session['login_attempts'] += 1
+            else:
+                request.session['login_attempts'] = 1
+            
+            # Check if login attempts exceed limit
+            if request.session.get('login_attempts', 0) >= 5:
+                return HttpResponseForbidden("Too many login attempts. Please try again later.")
 
-        return render(request, 'login.html', {'error': 'Invalid username or password.'})
+            return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
     
