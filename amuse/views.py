@@ -60,48 +60,46 @@ def signin(request):
 
 
 
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
-from django.db import connection
 from django.utils import timezone
-from django.http import Http404
+import time
 
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
-
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-            row = cursor.fetchone()
-
-        if row:
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                user.last_login = timezone.now()
-                user.save()
-                auth_login(request, user)
-                return redirect('index')
-            else:
-                raise Http404("User authentication failed.")
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)
+            user.last_login = timezone.now()
+            user.save()
+            return redirect('index')
         else:
             # Log failed login attempts
-            request.session.setdefault('login_attempts', 0)
-            request.session['login_attempts'] += 1
+            if 'login_attempts' in request.session:
+                request.session['login_attempts'] += 1
+            else:
+                request.session['login_attempts'] = 1
             
             # Check if login attempts exceed limit
-            if request.session['login_attempts'] >= 5:
-                last_attempt_time = request.session.get('last_attempt_time')
-                if last_attempt_time and timezone.now() < last_attempt_time + timezone.timedelta(seconds=300):
-                    # Calculate remaining time
-                    remaining_time = (last_attempt_time + timezone.timedelta(seconds=300) - timezone.now()).seconds
-                    raise Http404(f"Too many login attempts. Please try again in {remaining_time} seconds.")
-                
+            if request.session.get('login_attempts', 0) >= 5:
+                # Check if enough time has passed since the last login attempt
+                last_attempt_time_str = request.session.get('last_attempt_time')
+                if last_attempt_time_str:
+                    last_attempt_time = timezone.datetime.fromisoformat(last_attempt_time_str)
+                    if timezone.now() < last_attempt_time + timezone.timedelta(seconds=300):
+                        # Calculate remaining time
+                        remaining_time = (last_attempt_time + timezone.timedelta(seconds=300) - timezone.now()).seconds
+                        return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
+                else:
+                    last_attempt_time = timezone.now()
+
                 # Reset login attempts counter and update last attempt time
                 request.session['login_attempts'] = 1
-                request.session['last_attempt_time'] = timezone.now()
+                request.session['last_attempt_time'] = last_attempt_time.isoformat()
                     
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
