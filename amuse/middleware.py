@@ -2,7 +2,6 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
-from ratelimit.decorators import ratelimit
 
 class BruteForceMiddleware:
     def __init__(self, get_response):
@@ -25,10 +24,3 @@ class BruteForceMiddleware:
                 request.session['login_attempts'] = 0
 
         return response
-
-@ratelimit(key='ip', rate='5/m', block=True)
-def login_view(request):
-    # Your login view code
-
-
-    
