@@ -53,7 +53,7 @@ def signin(request):
             messages.success(request, 'You are now registered and can log in.')
             return redirect('login')  # Redirect to the login page after successful sign-up
         except IntegrityError:
-            messages.error(request, 'An error occurred while saving your data. Please try again.' {{ time_remaining }} seconds.)
+            messages.error(request, 'An error occurred while saving your data. Please try again.')
             return redirect('signin')
             
     return render(request, 'signin.html')
@@ -93,9 +93,9 @@ def user_login(request):
             
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
-                return HttpResponseForbidden("Too many login attempts. Please try again later.")
+                return HttpResponseForbidden("Too many login attempts. Please try again later." )
 
-            return render(request, 'login.html', {'error': 'Invalid username or password.'})
+            return render(request, 'login.html', {'error': 'Invalid username or password. {{ time_remaining }}'})
     else:
         return render(request, 'login.html')
 
