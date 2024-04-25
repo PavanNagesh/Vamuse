@@ -53,7 +53,7 @@ def signin(request):
             messages.success(request, 'You are now registered and can log in.')
             return redirect('login')  # Redirect to the login page after successful sign-up
         except IntegrityError:
-            messages.error(request, 'An error occurred while saving your data. Please try again.')
+            messages.error(request, 'An error occurred while saving your data. Please try again.' {{ time_remaining }} seconds.)
             return redirect('signin')
             
     return render(request, 'signin.html')
