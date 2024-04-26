@@ -82,6 +82,7 @@ def user_login(request):
             user.save()
 
             # Reset login attempts counter and last failed login time
+            print("Successful login - Resetting login attempts counter and last failed login time.")
             request.session['login_attempts'] = 0
             request.session['last_failed_login_time'] = None
 
