@@ -102,12 +102,11 @@ def user_login(request):
                     remaining_time = int((last_failed_login_time + timedelta(seconds=60) - timezone.now()).total_seconds())
                     if remaining_time > 0:
                         return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
-                else:
-                    # Update last failed login time
-                    request.session['last_failed_login_time'] = str(timezone.now().timestamp())
-                    remaining_time = 60
-                    return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
                 
+                # Reset login attempts counter and update last failed login time
+                request.session['login_attempts'] = 1
+                request.session['last_failed_login_time'] = str(timezone.now().timestamp())
+                    
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
