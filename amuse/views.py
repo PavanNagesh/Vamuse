@@ -99,9 +99,8 @@ def user_login(request):
                 last_failed_login_time = request.session.get('last_failed_login_time')
                 if last_failed_login_time:
                     last_failed_login_time = timezone.make_aware(timezone.datetime.fromtimestamp(float(last_failed_login_time)))
-                    if timezone.now() < last_failed_login_time + timedelta(seconds=60):
-                        # Calculate remaining time
-                        remaining_time = int((last_failed_login_time + timedelta(seconds=60) - timezone.now()).total_seconds())
+                    remaining_time = int((last_failed_login_time + timedelta(seconds=60) - timezone.now()).total_seconds())
+                    if remaining_time > 0:
                         return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
                 
                 # Reset login attempts counter and update last failed login time
