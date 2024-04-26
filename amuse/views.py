@@ -63,12 +63,11 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.db import connection
 from django.http import HttpResponseForbidden
+from datetime import timedelta
 import time
 
 def user_login(request):
-    print("User login function called.")  # Debug print
     if request.method == 'POST':
-        print("Method is POST.")  # Debug print
         username = request.POST.get('username')
         password = request.POST.get('password')
 
@@ -93,30 +92,25 @@ def user_login(request):
             else:
                 request.session['login_attempts'] = 1
             
-            print("Login Attempts:", request.session['login_attempts'])  # Debug print
-            
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
                 # Check if enough time has passed since the last login attempt
                 last_failed_login_time = request.session.get('last_failed_login_time')
                 if last_failed_login_time:
                     last_failed_login_time = float(last_failed_login_time)
-                    if time.time() < last_failed_login_time + 60:  # 60 seconds timeout
+                    if timezone.now() < timezone.datetime.fromtimestamp(last_failed_login_time) + timedelta(seconds=60):
                         # Calculate remaining time
-                        remaining_time = int(last_failed_login_time + 60 - time.time())
-                        print("Remaining Time:", remaining_time)  # Debug print
+                        remaining_time = int((timezone.datetime.fromtimestamp(last_failed_login_time) + timedelta(seconds=60) - timezone.now()).total_seconds())
                         return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
                 
                 # Reset login attempts counter and update last failed login time
                 request.session['login_attempts'] = 1
                 request.session['last_failed_login_time'] = str(time.time())
-                print("New Login Attempts:", request.session['login_attempts'])  # Debug print
-                print("New Last Failed Login Time:", request.session['last_failed_login_time'])  # Debug print
                     
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
-        print("Method is not POST.")  # Debug print
         return render(request, 'login.html')
+
 
 def user_profile(request):
     # Assuming user is already authenticated
