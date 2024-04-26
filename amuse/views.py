@@ -58,45 +58,27 @@ def signin(request):
             
     return render(request, 'signin.html')
 
-
-
-from django.contrib.auth import authenticate, login
-from django.http import HttpResponseForbidden
-from django.shortcuts import render
-from django.utils import timezone
-
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            login(request, user)
+        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
+
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            row = cursor.fetchone()
+
+        if row:
+            user = User.objects.get(username=username)
             user.last_login = timezone.now()
             user.save()
-            return render(request, 'index.html')  # Redirect to index.html
-        else:
-            # Rest of the code remains the same...
-            if 'login_attempts' in request.session:
-                request.session['login_attempts'] += 1
-            else:
-                request.session['login_attempts'] = 1
-            
-            if request.session.get('login_attempts', 0) >= 5:
-                last_attempt_time_str = request.session.get('last_attempt_time')
-                if last_attempt_time_str:
-                    last_attempt_time = timezone.datetime.fromisoformat(last_attempt_time_str)
-                    if timezone.now() < last_attempt_time + timezone.timedelta(seconds=300):
-                        remaining_time = (last_attempt_time + timezone.timedelta(seconds=300) - timezone.now()).seconds
-                        return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
-                else:
-                    last_attempt_time = timezone.now()
 
-                request.session['login_attempts'] = 1
-                request.session['last_attempt_time'] = last_attempt_time.isoformat()
-                    
-            return render(request, 'login.html', {'error': 'Invalid username or password.'})
+            # Log the user in using Django's login function
+            auth_login(request, user)
+            return redirect('index')
+
+        return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
 
