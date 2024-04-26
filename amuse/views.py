@@ -65,15 +65,10 @@ from django.db import connection
 from django.http import HttpResponseForbidden
 import time
 
-from django.contrib.auth import login as auth_login
-from django.shortcuts import render, redirect
-from django.utils import timezone
-from django.db import connection
-from django.http import HttpResponseForbidden
-import time
-
 def user_login(request):
+    print("User login function called.")  # Debug print
     if request.method == 'POST':
+        print("Method is POST.")  # Debug print
         username = request.POST.get('username')
         password = request.POST.get('password')
 
@@ -120,9 +115,8 @@ def user_login(request):
                     
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
+        print("Method is not POST.")  # Debug print
         return render(request, 'login.html')
-
-
 
 def user_profile(request):
     # Assuming user is already authenticated
