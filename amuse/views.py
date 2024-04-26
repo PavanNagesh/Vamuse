@@ -96,10 +96,10 @@ def user_login(request):
                 # Check if enough time has passed since the last login attempt
                 last_failed_login_time = request.session.get('last_failed_login_time')
                 if last_failed_login_time:
-                    last_failed_login_time = float(last_failed_login_time)
-                    if timezone.now() < timezone.datetime.fromtimestamp(last_failed_login_time) + timedelta(seconds=60):
+                    last_failed_login_time = timezone.make_aware(timezone.datetime.fromtimestamp(float(last_failed_login_time)))
+                    if timezone.now() < last_failed_login_time + timedelta(seconds=60):
                         # Calculate remaining time
-                        remaining_time = int((timezone.datetime.fromtimestamp(last_failed_login_time) + timedelta(seconds=60) - timezone.now()).total_seconds())
+                        remaining_time = int((last_failed_login_time + timedelta(seconds=60) - timezone.now()).total_seconds())
                         return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
                 
                 # Reset login attempts counter and update last failed login time
@@ -109,8 +109,6 @@ def user_login(request):
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
-
-
 
 def user_profile(request):
     # Assuming user is already authenticated
