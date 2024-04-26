@@ -65,13 +65,6 @@ from django.db import connection
 from django.http import HttpResponseForbidden
 import time
 
-from django.contrib.auth import login as auth_login
-from django.shortcuts import render, redirect
-from django.utils import timezone
-from django.db import connection
-from django.http import HttpResponseForbidden
-import time
-
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -101,22 +94,21 @@ def user_login(request):
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
                 # Check if enough time has passed since the last login attempt
-                last_attempt_time = request.session.get('last_attempt_time')
-                if last_attempt_time:
-                    last_attempt_time = float(last_attempt_time)
-                    if time.time() < last_attempt_time + 60:  # 60 seconds timeout
+                last_failed_login_time = request.session.get('last_failed_login_time')
+                if last_failed_login_time:
+                    last_failed_login_time = float(last_failed_login_time)
+                    if time.time() < last_failed_login_time + 60:  # 60 seconds timeout
                         # Calculate remaining time
-                        remaining_time = int(last_attempt_time + 60 - time.time())
+                        remaining_time = int(last_failed_login_time + 60 - time.time())
                         return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
                 
-                # Reset login attempts counter and update last attempt time
+                # Reset login attempts counter and update last failed login time
                 request.session['login_attempts'] = 1
-                request.session['last_attempt_time'] = str(time.time())
+                request.session['last_failed_login_time'] = str(time.time())
                     
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
-
 
 
 def user_profile(request):
