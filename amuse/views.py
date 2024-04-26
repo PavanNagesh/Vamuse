@@ -65,6 +65,13 @@ from django.db import connection
 from django.http import HttpResponseForbidden
 import time
 
+from django.contrib.auth import login as auth_login
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.db import connection
+from django.http import HttpResponseForbidden
+import time
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -109,6 +116,7 @@ def user_login(request):
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
 
 
 def user_profile(request):
