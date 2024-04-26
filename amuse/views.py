@@ -64,7 +64,6 @@ from django.utils import timezone
 from django.db import connection
 from django.http import HttpResponseForbidden
 from datetime import timedelta
-import time
 
 def user_login(request):
     if request.method == 'POST':
@@ -105,11 +104,12 @@ def user_login(request):
                 
                 # Reset login attempts counter and update last failed login time
                 request.session['login_attempts'] = 1
-                request.session['last_failed_login_time'] = str(time.time())
+                request.session['last_failed_login_time'] = str(timezone.now().timestamp())
                     
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
 
 
 def user_profile(request):
