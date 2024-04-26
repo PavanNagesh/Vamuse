@@ -81,18 +81,19 @@ def user_login(request):
             user.last_login = timezone.now()
             user.save()
 
+            # Reset login attempts counter and last failed login time
+            request.session['login_attempts'] = 0
+            request.session['last_failed_login_time'] = None
+
             # Log the user in using Django's login function
             auth_login(request, user)
             return redirect('index')
         else:
             # Log failed login attempts
-            if 'login_attempts' in request.session:
-                request.session['login_attempts'] += 1
-            else:
-                request.session['login_attempts'] = 1
+            request.session['login_attempts'] = request.session.get('login_attempts', 0) + 1
             
             # Check if login attempts exceed limit
-            if request.session.get('login_attempts', 0) >= 5:
+            if request.session['login_attempts'] >= 5:
                 # Check if enough time has passed since the last login attempt
                 last_failed_login_time = request.session.get('last_failed_login_time')
                 if last_failed_login_time:
