@@ -65,6 +65,13 @@ from django.db import connection
 from django.http import HttpResponseForbidden
 import time
 
+from django.contrib.auth import login as auth_login
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.db import connection
+from django.http import HttpResponseForbidden
+import time
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -91,6 +98,8 @@ def user_login(request):
             else:
                 request.session['login_attempts'] = 1
             
+            print("Login Attempts:", request.session['login_attempts'])  # Debug print
+            
             # Check if login attempts exceed limit
             if request.session.get('login_attempts', 0) >= 5:
                 # Check if enough time has passed since the last login attempt
@@ -100,15 +109,19 @@ def user_login(request):
                     if time.time() < last_failed_login_time + 60:  # 60 seconds timeout
                         # Calculate remaining time
                         remaining_time = int(last_failed_login_time + 60 - time.time())
+                        print("Remaining Time:", remaining_time)  # Debug print
                         return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
                 
                 # Reset login attempts counter and update last failed login time
                 request.session['login_attempts'] = 1
                 request.session['last_failed_login_time'] = str(time.time())
+                print("New Login Attempts:", request.session['login_attempts'])  # Debug print
+                print("New Last Failed Login Time:", request.session['last_failed_login_time'])  # Debug print
                     
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
 
 
 def user_profile(request):
