@@ -24,8 +24,10 @@ from datetime import datetime, timedelta
 from django.core.mail import send_mail
 import random
 from django.http import HttpResponseForbidden
-
-
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.utils import timezone
+from .models import CustomUser
 
 def signin(request):
     if request.method == 'POST':
@@ -39,17 +41,17 @@ def signin(request):
             return redirect('signin')
         
         # Check if the email or username already exists
-        if User.objects.filter(email=email).exists():
+        if CustomUser.objects.filter(email=email).exists():
             messages.error(request, 'Email is already used.')
             return redirect('signin')
         
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             messages.error(request, 'Username is already taken.')
             return redirect('signin')
         
         try:
             # Create a new user instance and save it to the database
-            user = User.objects.create(username=username, email=email, password=password)
+            user = CustomUser.objects.create(username=username, email=email, password=password)
             messages.success(request, 'You are now registered and can log in.')
             return redirect('login')  # Redirect to the login page after successful sign-up
         except IntegrityError:
@@ -57,11 +59,6 @@ def signin(request):
             return redirect('signin')
             
     return render(request, 'signin.html')
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.utils import timezone
-from .models import User
 
 def user_login(request):
     if request.method == 'POST':
@@ -83,7 +80,7 @@ def user_login(request):
         else:
             # Update failed login attempts and lockout status
             try:
-                user = User.objects.get(username=username)
+                user = CustomUser.objects.get(username=username)
                 user.failed_login_attempts += 1
 
                 # Check if user should be locked out
@@ -99,11 +96,10 @@ def user_login(request):
                     return render(request, 'login.html', {'error': f'This account is locked. Please try again after {int(remaining_time)} seconds.'})
                 else:
                     return render(request, 'login.html', {'error': 'Invalid username or password.'})
-            except User.DoesNotExist:
+            except CustomUser.DoesNotExist:
                 return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
-
 
 def user_profile(request):
     # Assuming user is already authenticated
@@ -113,7 +109,6 @@ def user_profile(request):
 def logout_view(request):
     logout(request)
     return redirect('login')  # Redirect to your login page URL
-
 
 def index(request):
     return render(request, 'index.html')
@@ -141,7 +136,6 @@ def services(request):
 
 def home(request):
     return render(request, 'home.html')
-
 
 @login_required
 def change(request):
@@ -181,3 +175,4 @@ def update(request):
         return redirect('userprofile')
     # Render the update profile form for GET requests
     return render(request, 'update.html')
+
