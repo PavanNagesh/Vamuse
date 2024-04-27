@@ -58,29 +58,52 @@ def signin(request):
             
     return render(request, 'signin.html')
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.utils import timezone
+from .models import User
+
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
+        # Find the user object
+        user = authenticate(request, username=username, password=password)
 
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-            row = cursor.fetchone()
-
-        if row:
-            user = User.objects.get(username=username)
-            user.last_login = timezone.now()
+        if user is not None:
+            # Reset failed attempts and lockout status if login is successful
+            user.failed_login_attempts = 0
+            user.locked_out_until = None
             user.save()
 
             # Log the user in using Django's login function
-            auth_login(request, user)
+            login(request, user)
             return redirect('index')
+        else:
+            # Update failed login attempts and lockout status
+            try:
+                user = User.objects.get(username=username)
+                user.failed_login_attempts += 1
 
-        return render(request, 'login.html', {'error': 'Invalid username or password.'})
+                # Check if user should be locked out
+                if user.failed_login_attempts >= 5:
+                    user.locked_out_until = timezone.now() + timezone.timedelta(minutes=1)
+                    user.failed_login_attempts = 0
+                
+                user.save()
+
+                if user.locked_out_until and user.locked_out_until > timezone.now():
+                    # User is locked out
+                    remaining_time = (user.locked_out_until - timezone.now()).total_seconds()
+                    return render(request, 'login.html', {'error': f'This account is locked. Please try again after {int(remaining_time)} seconds.'})
+                else:
+                    return render(request, 'login.html', {'error': 'Invalid username or password.'})
+            except User.DoesNotExist:
+                return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
 
 def user_profile(request):
     # Assuming user is already authenticated
