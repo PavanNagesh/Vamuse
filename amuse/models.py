@@ -4,30 +4,13 @@ from django.utils import timezone
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=150, unique=True)  # Adding username field
+    username = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=128)
-    failed_login_attempts = models.IntegerField(default=0)
-    last_failed_login_attempt = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.username
 
-    def increase_failed_login_attempts(self):
-        self.failed_login_attempts += 1
-        self.last_failed_login_attempt = timezone.now()
-        self.save()
-
-    def reset_failed_login_attempts(self):
-        self.failed_login_attempts = 0
-        self.last_failed_login_attempt = None
-        self.save()
-
-    def is_locked_out(self):
-        # Define your lockout logic here (e.g., lockout after 5 failed attempts)
-        return self.failed_login_attempts >= 5 and self.last_failed_login_attempt is not None and \
-               (timezone.now() - self.last_failed_login_attempt).total_seconds() < 60
-
-class UserLoginAttempts(models.Model):
+class LoginAttempt(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     failed_login_attempts = models.IntegerField(default=0)
     last_failed_login_attempt = models.DateTimeField(null=True, blank=True)
