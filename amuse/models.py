@@ -24,8 +24,8 @@ class User(AbstractUser):
 
     def is_locked_out(self):
         # Define your lockout logic here (e.g., lockout after 5 failed attempts)
-        # This method should return True if the user is currently locked out, False otherwise
-        pass
+        return self.failed_login_attempts >= 5 and self.last_failed_login_attempt is not None and \
+               (timezone.now() - self.last_failed_login_attempt).total_seconds() < 60
 
 class UserGroup(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
