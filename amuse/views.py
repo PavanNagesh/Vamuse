@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 import time
 from django.conf import settings
 from datetime import datetime, timedelta
@@ -50,7 +50,7 @@ def signin(request):
         
         try:
             # Create a new user instance and save it to the database
-            user = CustomUser.objects.create(username=username, email=email, password=password)
+            user = CustomUser.objects.create_user(username=username, email=email, password=password)
             messages.success(request, 'You are now registered and can log in.')
             return redirect('login')  # Redirect to the login page after successful sign-up
         except IntegrityError:
