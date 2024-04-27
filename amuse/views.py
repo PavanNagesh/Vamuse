@@ -59,11 +59,11 @@ def signin(request):
     return render(request, 'signin.html')
 
 from django.contrib.auth import login as auth_login
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-from django.utils import timezone
-from django.db import connection
-from django.http import HttpResponseForbidden
-from datetime import timedelta
+from datetime import datetime, timedelta
+
+LOCKOUT_DURATION = 60  # Lockout duration in seconds
 
 def user_login(request):
     if request.method == 'POST':
@@ -71,19 +71,20 @@ def user_login(request):
         password = request.POST.get('password')
 
         # Check if the user is locked out
-        locked_out = is_user_locked_out(username)
-        if locked_out:
+        if is_user_locked_out(username):
             return render(request, 'login.html', {'error': 'This account is temporarily locked. Please try again later.'})
 
+        # Original query for retrieving user data from the database
         query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
 
+        # Execute the query
         with connection.cursor() as cursor:
             cursor.execute(query)
             row = cursor.fetchone()
 
         if row:
             user = User.objects.get(username=username)
-            user.last_login = timezone.now()
+            user.last_login = datetime.now()
             user.failed_login_attempts = 0  # Reset failed login attempts
             user.save()
 
@@ -104,25 +105,30 @@ def user_login(request):
         return render(request, 'login.html')
 
 def is_user_locked_out(username):
-    # Check if the user is locked out based on some criteria (e.g., a lockout timestamp)
-    # You need to implement this function according to your database schema
-    pass
+    user = User.objects.get(username=username)
+    if user.last_failed_login_attempt:
+        lockout_expiry = user.last_failed_login_attempt + timedelta(seconds=LOCKOUT_DURATION)
+        return lockout_expiry > datetime.now()
+    return False
 
 def update_failed_login_attempts(username):
-    # Update the number of failed login attempts for the user
-    # You need to implement this function according to your database schema
-    pass
+    user = User.objects.get(username=username)
+    user.failed_login_attempts += 1
+    user.last_failed_login_attempt = datetime.now()
+    user.save()
+
+    if user.failed_login_attempts >= 5:
+        lock_out_user(username)
 
 def should_lock_out_user(username):
-    # Check if the user should be locked out based on the number of failed login attempts
-    # You need to implement this function according to your lockout policy
-    pass
+    user = User.objects.get(username=username)
+    return user.failed_login_attempts >= 5
 
 def lock_out_user(username):
-    # Lock out the user (e.g., set a lockout timestamp)
-    # You need to implement this function according to your database schema
-    pass
-
+    user = User.objects.get(username=username)
+    user.failed_login_attempts = 0
+    user.last_failed_login_attempt = datetime.now()
+    user.save()
 
 def user_profile(request):
     # Assuming user is already authenticated
