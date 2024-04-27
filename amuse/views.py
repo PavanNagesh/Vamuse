@@ -81,33 +81,11 @@ def user_login(request):
             user.last_login = timezone.now()
             user.save()
 
-            # Reset login attempts counter and last failed login time
-            print("Successful login - Resetting login attempts counter and last failed login time.")
-            request.session['login_attempts'] = 0
-            request.session['last_failed_login_time'] = None
-
             # Log the user in using Django's login function
             auth_login(request, user)
             return redirect('index')
-        else:
-            # Log failed login attempts
-            request.session['login_attempts'] = request.session.get('login_attempts', 0) + 1
-            
-            # Check if login attempts exceed limit
-            if request.session['login_attempts'] >= 5:
-                # Check if enough time has passed since the last login attempt
-                last_failed_login_time = request.session.get('last_failed_login_time')
-                if last_failed_login_time:
-                    last_failed_login_time = timezone.make_aware(timezone.datetime.fromtimestamp(float(last_failed_login_time)))
-                    remaining_time = int((last_failed_login_time + timedelta(seconds=60) - timezone.now()).total_seconds())
-                    if remaining_time > 0:
-                        return HttpResponseForbidden(f"Too many login attempts. Please try again in {remaining_time} seconds.")
-                
-                # Reset login attempts counter and update last failed login time
-                request.session['login_attempts'] = 1
-                request.session['last_failed_login_time'] = str(timezone.now().timestamp())
-                    
-            return render(request, 'login.html', {'error': 'Invalid username or password.'})
+
+        return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
 
