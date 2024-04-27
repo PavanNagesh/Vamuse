@@ -27,6 +27,11 @@ class User(AbstractUser):
         return self.failed_login_attempts >= 5 and self.last_failed_login_attempt is not None and \
                (timezone.now() - self.last_failed_login_attempt).total_seconds() < 60
 
+class UserLoginAttempts(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    failed_login_attempts = models.IntegerField(default=0)
+    last_failed_login_attempt = models.DateTimeField(null=True, blank=True)
+
 class UserGroup(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
