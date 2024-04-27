@@ -58,7 +58,29 @@ def signin(request):
             
     return render(request, 'signin.html')
 
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
+        query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
+
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            row = cursor.fetchone()
+
+        if row:
+            user = User.objects.get(username=username)
+            user.last_login = timezone.now()
+            user.save()
+
+            # Log the user in using Django's login function
+            auth_login(request, user)
+            return redirect('index')
+
+        return render(request, 'login.html', {'error': 'Invalid username or password.'})
+    else:
+        return render(request, 'login.html')
 
 def user_profile(request):
     # Assuming user is already authenticated
