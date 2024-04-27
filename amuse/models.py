@@ -10,7 +10,7 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-class LoginAttempt(AbstractUser):
+class LoginAttempt(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     failed_login_attempts = models.IntegerField(default=0)
     last_failed_login_attempt = models.DateTimeField(null=True, blank=True)
