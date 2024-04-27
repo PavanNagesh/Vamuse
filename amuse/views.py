@@ -59,9 +59,11 @@ def signin(request):
     return render(request, 'signin.html')
 
 from django.contrib.auth import login as auth_login
-from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-from datetime import datetime, timedelta
+from django.utils import timezone
+from django.db import connection
+from django.http import HttpResponseForbidden
+from datetime import timedelta
 
 def user_login(request):
     if request.method == 'POST':
@@ -163,4 +165,3 @@ def update(request):
         return redirect('userprofile')
     # Render the update profile form for GET requests
     return render(request, 'update.html')
-
