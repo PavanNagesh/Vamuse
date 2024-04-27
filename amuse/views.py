@@ -70,6 +70,11 @@ def user_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
+        # Check if the user is locked out
+        locked_out = is_user_locked_out(username)
+        if locked_out:
+            return render(request, 'login.html', {'error': 'This account is temporarily locked. Please try again later.'})
+
         query = f"SELECT * FROM amuse_user WHERE username = '{username}' AND password = '{password}'"
 
         with connection.cursor() as cursor:
@@ -79,15 +84,45 @@ def user_login(request):
         if row:
             user = User.objects.get(username=username)
             user.last_login = timezone.now()
+            user.failed_login_attempts = 0  # Reset failed login attempts
             user.save()
 
             # Log the user in using Django's login function
             auth_login(request, user)
             return redirect('index')
+        else:
+            # Increment failed login attempts
+            update_failed_login_attempts(username)
 
-        return render(request, 'login.html', {'error': 'Invalid username or password.'})
+            # Check if the user should be locked out
+            if should_lock_out_user(username):
+                lock_out_user(username)
+                return render(request, 'login.html', {'error': 'Invalid username or password. This account has been locked for 1 minute.'})
+
+            return render(request, 'login.html', {'error': 'Invalid username or password.'})
     else:
         return render(request, 'login.html')
+
+def is_user_locked_out(username):
+    # Check if the user is locked out based on some criteria (e.g., a lockout timestamp)
+    # You need to implement this function according to your database schema
+    pass
+
+def update_failed_login_attempts(username):
+    # Update the number of failed login attempts for the user
+    # You need to implement this function according to your database schema
+    pass
+
+def should_lock_out_user(username):
+    # Check if the user should be locked out based on the number of failed login attempts
+    # You need to implement this function according to your lockout policy
+    pass
+
+def lock_out_user(username):
+    # Lock out the user (e.g., set a lockout timestamp)
+    # You need to implement this function according to your database schema
+    pass
+
 
 def user_profile(request):
     # Assuming user is already authenticated
