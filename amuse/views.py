@@ -1,6 +1,6 @@
 # views.py
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+from .models import CustomUser
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login
@@ -27,7 +27,6 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.utils import timezone
-from .models import CustomUser
 
 def signin(request):
     if request.method == 'POST':
