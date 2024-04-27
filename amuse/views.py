@@ -6,8 +6,6 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
-from django.contrib.auth.models import User
-from .models import User
 from django.db import connection
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
@@ -24,9 +22,7 @@ from datetime import datetime, timedelta
 from django.core.mail import send_mail
 import random
 from django.http import HttpResponseForbidden
-from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from django.utils import timezone
 
 def signin(request):
     if request.method == 'POST':
