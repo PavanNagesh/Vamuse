@@ -1,7 +1,3 @@
-from django.contrib.auth.models import AbstractUser, Group, Permission
-from django.db import models
-from django.utils import timezone
-
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=True)
@@ -11,18 +7,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
-
-    def increment_failed_login_attempts(self):
-        self.failed_login_attempts += 1
-        if self.failed_login_attempts >= 5:
-            self.locked_out_until = timezone.now() + timezone.timedelta(minutes=1)
-            self.failed_login_attempts = 0
-        self.save()
-
-    def reset_failed_login_attempts(self):
-        self.failed_login_attempts = 0
-        self.locked_out_until = None
-        self.save()
 
 class UserGroup(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
