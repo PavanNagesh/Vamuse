@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 from django.core.mail import send_mail
 import random
 from django.http import HttpResponseForbidden
-
+from .models import CustomUser
 
 
 def signin(request):
