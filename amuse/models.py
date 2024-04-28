@@ -13,9 +13,9 @@ class User(AbstractUser):
         return self.username
 
 class UserGroup(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     group = models.ForeignKey('auth.Group', on_delete=models.CASCADE)
 
 class UserPermission(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     permission = models.ForeignKey('auth.Permission', on_delete=models.CASCADE)
