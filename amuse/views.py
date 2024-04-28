@@ -1,13 +1,13 @@
 # views.py
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+from django.contrib.auth.models import CustomUser
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from .models import User
+from .models import CustomUser
 from django.db import connection
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
@@ -39,17 +39,17 @@ def signin(request):
             return redirect('signin')
         
         # Check if the email or username already exists
-        if User.objects.filter(email=email).exists():
+        if CustomUser.objects.filter(email=email).exists():
             messages.error(request, 'Email is already used.')
             return redirect('signin')
         
-        if User.objects.filter(username=username).exists():
+        if CuatomUser.objects.filter(username=username).exists():
             messages.error(request, 'Username is already taken.')
             return redirect('signin')
         
         try:
             # Create a new user instance and save it to the database
-            user = User.objects.create(username=username, email=email, password=password)
+            user = CustomUser.objects.create(username=username, email=email, password=password)
             messages.success(request, 'You are now registered and can log in.')
             return redirect('login')  # Redirect to the login page after successful sign-up
         except IntegrityError:
@@ -70,7 +70,7 @@ def user_login(request):
             row = cursor.fetchone()
 
         if row:
-            user = User.objects.get(username=username)
+            user = CustomUser.objects.get(username=username)
             user.last_login = timezone.now()
             user.save()
 
