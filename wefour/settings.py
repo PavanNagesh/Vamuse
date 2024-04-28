@@ -78,7 +78,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'amuse.CustomUser'
+AUTH_USER_MODEL = 'amuse.User'
 
 LANGUAGE_CODE = "en-us"
 
