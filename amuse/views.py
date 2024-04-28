@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 from django.core.mail import send_mail
 import random
 from django.http import HttpResponseForbidden
-from .models import CustomUser
+from .models import User
 
 
 def signin(request):
@@ -39,17 +39,17 @@ def signin(request):
             return redirect('signin')
         
         # Check if the email or username already exists
-        if CustomUser.objects.filter(email=email).exists():
+        if User.objects.filter(email=email).exists():
             messages.error(request, 'Email is already used.')
             return redirect('signin')
         
-        if CuatomUser.objects.filter(username=username).exists():
+        if User.objects.filter(username=username).exists():
             messages.error(request, 'Username is already taken.')
             return redirect('signin')
         
         try:
             # Create a new user instance and save it to the database
-            user = CustomUser.objects.create(username=username, email=email, password=password)
+            user = User.objects.create(username=username, email=email, password=password)
             messages.success(request, 'You are now registered and can log in.')
             return redirect('login')  # Redirect to the login page after successful sign-up
         except IntegrityError:
@@ -70,7 +70,7 @@ def user_login(request):
             row = cursor.fetchone()
 
         if row:
-            user = CustomUser.objects.get(username=username)
+            user = User.objects.get(username=username)
             user.last_login = timezone.now()
             user.save()
 
