@@ -7,7 +7,6 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from .models import CustomUser
 from django.db import connection
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
